@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvoDashboard | Minimal & Clean</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: #f3f4f6;
+        }
+
+        /* Современные карточки с мягкими тенями */
+        .modern-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0, 0, 0, 0.02);
+        }
+
+        .modern-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 40px -15px rgba(0, 0, 0, 0.1), 0 3px 8px rgba(0, 0, 0, 0.03);
+            border-color: rgba(99, 102, 241, 0.1);
+        }
+
+        /* Минималистичные кнопки */
+        .minimal-button {
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #374151;
+            padding: 0.5rem 1rem;
+            border-radius: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .minimal-button:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            transform: scale(0.98);
+        }
+
+        .minimal-button-primary {
+            background: #4f46e5;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .minimal-button-primary:hover {
+            background: #4338ca;
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
+        }
+
+        /* Плавные появления */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Статистические цифры */
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #111827;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+            font-weight: 500;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+        }
+
+        /* Прогресс-бар */
+        .progress-bar {
+            height: 6px;
+            background: #f3f4f6;
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #818cf8);
+            border-radius: 100px;
+            transition: width 1s ease;
+        }
+
+        /* Чекбоксы задач */
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .task-checkbox:hover {
+            border-color: #4f46e5;
+            background: #f5f3ff;
+        }
+
+        .task-checkbox.checked {
+            background: #4f46e5;
+            border-color: #4f46e5;
+        }
+
+        /* Аватарки */
+        .avatar-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            border: 3px solid white;
+            margin-left: -8px;
+            background: linear-gradient(135deg, #4f46e5, #818cf8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .avatar:first-child {
+            margin-left: 0;
+        }
+
+        /* Теги */
+        .tag {
+            padding: 0.25rem 0.75rem;
+            background: #f3f4f6;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #4b5563;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .tag-blue {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        /* Разделители */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+            margin: 1.5rem 0;
+        }
+
+        /* Инпуты */
+        .modern-input {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 0.75rem 1rem;
+            transition: all 0.2s ease;
+            background: white;
+            width: 100%;
+        }
+
+        .modern-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Скелетон загрузки */
+        .skeleton {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: skeleton 1.5s infinite;
+            border-radius: 12px;
+        }
+
+        @keyframes skeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 antialiased">
+    <!-- Верхняя навигация -->
+    <div class="bg-white border-b border-gray-100 sticky top-0 z-50 backdrop-blur-lg bg-white/80">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex justify-between items-center h-20">
+                <!-- Лого -->
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-md">
+                        E
+                    </div>
+                    <div>
+                        <span class="font-semibold text-gray-900 text-lg">EvoDash</span>
+                        <span class="text-xs text-gray-400 ml-2">v2.0</span>
+                    </div>
+                </div>
+
+                <!-- Поиск -->
+                <div class="flex-1 max-w-md mx-8">
+                    <div class="relative">
+                        <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <input type="text" placeholder="Поиск..." class="modern-input pl-12 pr-4 bg-gray-50 border-0">
+                    </div>
+                </div>
+
+                <!-- Профиль -->
+                <div class="flex items-center gap-4">
+                    <button class="minimal-button flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                        </svg>
+                        <span class="hidden sm:inline">Уведомления</span>
+                        <span class="bg-indigo-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                    </button>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="text-right hidden md:block">
+                            <div class="text-sm font-medium text-gray-900">Алексей Петров</div>
+                            <div class="text-xs text-gray-400">Администратор</div>
+                        </div>
+                        <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-semibold text-lg shadow-md">
+                            АП
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6 py-8">
+        <!-- Приветствие -->
+        <div class="mb-8 fade-in" style="animation-delay: 0s;">
+            <h1 class="text-3xl font-semibold text-gray-900">Доброе утро, Алексей 👋</h1>
+            <p class="text-gray-400 mt-2">Вот что происходит с вашим проектом сегодня</p>
+        </div>
+
+        <!-- Статистика -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.1s;">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </div>
+                    <span class="tag tag-blue">+12%</span>
+                </div>
+                <div class="stat-value">2,451</div>
+                <div class="stat-label">Активные пользователи</div>
+            </div>
+
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.2s;">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <span class="tag">+8%</span>
+                </div>
+                <div class="stat-value">98.5K</div>
+                <div class="stat-label">Просмотры страниц</div>
+            </div>
+
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.3s;">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <span class="tag">+23%</span>
+                </div>
+                <div class="stat-value">$45.2K</div>
+                <div class="stat-label">Выручка</div>
+            </div>
+
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.4s;">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/>
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
+                        </svg>
+                    </div>
+                    <span class="tag">+5%</span>
+                </div>
+                <div class="stat-value">78%</div>
+                <div class="stat-label">Удержание</div>
+            </div>
+        </div>
+
+        <!-- График и задачи -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- График -->
+            <div class="lg:col-span-2 modern-card p-6 fade-in" style="animation-delay: 0.5s;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Посещаемость за неделю</h2>
+                    <div class="flex gap-2">
+                        <button class="minimal-button text-sm">День</button>
+                        <button class="minimal-button text-sm bg-indigo-50 border-indigo-200 text-indigo-600">Неделя</button>
+                        <button class="minimal-button text-sm">Месяц</button>
+                    </div>
+                </div>
+                <div style="height: 250px;">
+                    <canvas id="visitorsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Задачи -->
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.6s;">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900">Задачи на сегодня</h2>
+                    <span class="text-sm text-indigo-600 font-medium" id="taskProgress">3/5 выполнено</span>
+                </div>
+
+                <!-- Прогресс задач -->
+                <div class="progress-bar mb-6">
+                    <div class="progress-fill" id="taskProgressBar" style="width: 60%"></div>
+                </div>
+
+                <!-- Список задач -->
+                <div class="space-y-3 mb-6 max-h-64 overflow-y-auto pr-2 custom-scroll" id="taskList">
+                    <!-- Задачи будут добавлены через JS -->
+                </div>
+
+                <!-- Добавление задачи -->
+                <div class="flex gap-2">
+                    <input type="text" id="taskInput" placeholder="Новая задача..." class="modern-input text-sm">
+                    <button onclick="addTask()" class="minimal-button-primary min-w-[80px] text-sm font-medium">
+                        Добавить
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Команда и активность -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Команда -->
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.7s;">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6">Команда проекта</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-indigo-400 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-semibold">
+                                АП
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">Алексей Петров</div>
+                                <div class="text-xs text-gray-400">Team Lead</div>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Online</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center text-white font-semibold">
+                                МИ
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">Мария Иванова</div>
+                                <div class="text-xs text-gray-400">UI/UX Designer</div>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Busy</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center text-white font-semibold">
+                                ДС
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">Дмитрий Соколов</div>
+                                <div class="text-xs text-gray-400">Backend Dev</div>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-emerald-50 text-emerald-600 px-2 py-1 rounded-full">Online</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-gradient-to-br from-rose-400 to-rose-600 rounded-2xl flex items-center justify-center text-white font-semibold">
+                                ЕК
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">Екатерина Козлова</div>
+                                <div class="text-xs text-gray-400">Frontend Dev</div>
+                            </div>
+                        </div>
+                        <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Away</span>
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="flex items-center justify-between">
+                    <div class="avatar-group">
+                        <div class="avatar">+3</div>
+                        <div class="avatar">АН</div>
+                        <div class="avatar">СМ</div>
+                    </div>
+                    <button class="minimal-button text-sm">Пригласить</button>
+                </div>
+            </div>
+
+            <!-- Активность -->
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.8s;">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6">Последние действия</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 shrink-0">
+                            📄
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-900">Обновлен дизайн главной страницы</p>
+                            <p class="text-xs text-gray-400 mt-1">5 минут назад</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 shrink-0">
+                            💬
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-900">Новый комментарий в задаче #124</p>
+                            <p class="text-xs text-gray-400 mt-1">15 минут назад</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 shrink-0">
+                            🚀
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-900">Деплой версии 2.1.0 на продакшн</p>
+                            <p class="text-xs text-gray-400 mt-1">1 час назад</p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <div class="w-8 h-8 bg-rose-100 rounded-xl flex items-center justify-center text-rose-600 shrink-0">
+                            🐛
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-900">Исправлен критический баг</p>
+                            <p class="text-xs text-gray-400 mt-1">2 часа назад</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Быстрые действия -->
+            <div class="modern-card p-6 fade-in" style="animation-delay: 0.9s;">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6">Быстрые действия</h2>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button class="minimal-button flex flex-col items-center p-4 gap-2 h-auto">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span class="text-xs">Создать</span>
+                    </button>
+
+                    <button class="minimal-button flex flex-col items-center p-4 gap-2 h-auto">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        <span class="text-xs">Чат</span>
+                    </button>
+
+                    <button class="minimal-button flex flex-col items-center p-4 gap-2 h-auto">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <span class="text-xs">Задачи</span>
+                    </button>
+
+                    <button class="minimal-button flex flex-col items-center p-4 gap-2 h-auto">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        <span class="text-xs">Календарь</span>
+                    </button>
+                </div>
+
+                <div class="mt-4 p-4 bg-gray-50 rounded-2xl">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm font-medium text-gray-900">Загрузка сервера</span>
+                        <span class="text-xs text-gray-500">45%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                    <div class="flex justify-between mt-2 text-xs text-gray-400">
+                        <span>CPU: 23%</span>
+                        <span>RAM: 62%</span>
+                        <span>Disk: 34%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Футер -->
+        <footer class="mt-12 text-center text-sm text-gray-400 fade-in" style="animation-delay: 1s;">
+            <p>EvoDashboard © 2024 • Сделано с любовью для современных проектов</p>
+        </footer>
+    </main>
+
+    <script>
+        // Менеджер задач
+        class TaskManager {
+            constructor() {
+                this.tasks = [
+                    { id: 1, text: 'Подготовить отчет за квартал', completed: false },
+                    { id: 2, text: 'Обновить документацию API', completed: true },
+                    { id: 3, text: 'Созвониться с командой в 15:00', completed: false },
+                    { id: 4, text: 'Проверить пул-реквесты', completed: true },
+                    { id: 5, text: 'Запланировать спринт', completed: false }
+                ];
+            }
+
+            getTasks() { return this.tasks; }
+            
+            addTask(text) {
+                const task = { id: Date.now(), text, completed: false };
+                this.tasks.unshift(task);
+                return task;
+            }
+            
+            toggleTask(id) {
+                const task = this.tasks.find(t => t.id === id);
+                if (task) task.completed = !task.completed;
+                return task;
+            }
+            
+            deleteTask(id) {
+                this.tasks = this.tasks.filter(t => t.id !== id);
+                return { success: true };
+            }
+
+            getProgress() {
+                const completed = this.tasks.filter(t => t.completed).length;
+                return {
+                    completed,
+                    total: this.tasks.length,
+                    percent: (completed / this.tasks.length) * 100
+                };
+            }
+        }
+
+        const taskManager = new TaskManager();
+        let tasks = taskManager.getTasks();
+
+        // Рендеринг задач
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            const progress = taskManager.getProgress();
+            
+            document.getElementById('taskProgress').textContent = `${progress.completed}/${progress.total} выполнено`;
+            document.getElementById('taskProgressBar').style.width = `${progress.percent}%`;
+
+            taskList.innerHTML = tasks.map(task => `
+                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl group hover:bg-gray-100 transition-all">
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})">
+                        ${task.completed ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linecap="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
+                    </div>
+                    <span class="flex-1 text-sm ${task.completed ? 'line-through text-gray-400' : 'text-gray-900'}">${task.text}</span>
+                    <button onclick="deleteTask(${task.id})" class="opacity-0 group-hover:opacity-100 transition-all">
+                        <svg class="w-4 h-4 text-gray-400 hover:text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linecap="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Глобальные функции
+        window.addTask = function() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            if (text) {
+                taskManager.addTask(text);
+                tasks = taskManager.getTasks();
+                renderTasks();
+                input.value = '';
+            }
+        };
+
+        window.toggleTask = function(id) {
+            taskManager.toggleTask(id);
+            tasks = taskManager.getTasks();
+            renderTasks();
+        };
+
+        window.deleteTask = function(id) {
+            taskManager.deleteTask(id);
+            tasks = taskManager.getTasks();
+            renderTasks();
+        };
+
+        // Инициализация графика
+        function initChart() {
+            const ctx = document.getElementById('visitorsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                    datasets: [{
+                        label: 'Посетители',
+                        data: [1240, 1850, 1520, 2100, 1840, 2350, 2100],
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.05)',
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: '#4f46e5',
+                        pointBorderColor: 'white',
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { 
+                            grid: { color: '#f3f4f6' },
+                            ticks: { color: '#9ca3af' }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: '#9ca3af' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Добавляем стили для скролла
+        const style = document.createElement('style');
+        style.textContent = `
+            .custom-scroll::-webkit-scrollbar {
+                width: 4px;
+            }
+            .custom-scroll::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+            .custom-scroll::-webkit-scrollbar-thumb {
+                background: #cbd5e0;
+                border-radius: 10px;
+            }
+            .custom-scroll::-webkit-scrollbar-thumb:hover {
+                background: #a0aec0;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Запуск
+        window.onload = () => {
+            renderTasks();
+            initChart();
+
+            // Enter для добавления задачи
+            document.getElementById('taskInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') addTask();
+            });
+        };
+    </script>
+</body>
+</html>
